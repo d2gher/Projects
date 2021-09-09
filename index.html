@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>StopWatch</title>
+    <style>
+      html {
+        background-color: rgb(10, 9, 9);
+        display: flex;
+        position: absolute;
+        left: 50%;
+        justify-content: center;
+        transform: scale(1.4);
+        max-width: 80%;
+        
+      }
+      body {
+        position: absolute;
+        top: 10%;
+      }
+      p {
+        font-family: sans-serif;
+        color: white;
+        padding-left: 5.8em;
+      }
+      button {
+        color: rgb(255, 255, 255);
+        background-color: rgb(38, 11, 65);
+        border-radius: 5px;
+        border: 2px solid rgb(248, 164, 229);
+        width: 100px;
+        height: 2em;
+      }
+      button:disabled {
+        background-color: rgb(0, 0, 0);
+        color: rgb(68, 68, 68);
+        border: 2px solid rgb(41, 35, 39);
+      }
+      table {
+        
+        color: white;
+        margin-top: 1em;
+        border-collapse: collapse;
+        display: block;
+        position: relative;
+        left: -13%
+        
+      }
+      th {
+        border: 1px solid white;
+        padding: .2em;
+        min-width: 10em;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="clock">00:00:00</p>
+    <button class="start">Start</button>
+    <button class="pause" disabled>Pause</button>
+    <button class="reset" disabled>Reset</button>
+    <table>
+      <tbody class="timeTable">
+        <tr>
+          <th>Date and Time</th>
+          <th>Time elapsed</th>
+        </tr>
+      </tbody>
+    </table>
+    <script>
+      /* Retrive the old data from storage */
+      // get the number of items stored in the local storage
+      let length = function() {
+        let j = 0;
+        while(localStorage.getItem(j)) {
+          j++;
+        }
+        return j;
+      };
+      let storageKey = length();
+
+      //check if there is old data stored in the local storage, 
+      //and populate our table with it if there is from newest to oldest
+      if (storageKey) {
+        for (let i = storageKey - 2; i >= 0; i -= 2) {
+          //create a new row and add it to the table 
+          let newRow = document.createElement("tr");
+          document.querySelector(".timeTable").appendChild(newRow);
+          //create a cell to show the stored date and time, and add it to the new row
+          let newDate = document.createElement("th");
+          newDate.textContent = localStorage.getItem(i);
+          newRow.appendChild(newDate);
+          //create a cell to show the stored time elapsed, and add it to the new row
+          let newRecord = document.createElement("th");
+          newRecord.textContent = localStorage.getItem(i+1);
+          newRow.appendChild(newRecord);
+        }
+      }
+      //initialize varibles for global use
+      let secondsCount = 0;
+      let stopWatch;
+      let startTime = null;
+      let pauseCount = 0;
+      let pauseTime = null;
+      const start = document.querySelector(".start");
+      const pause = document.querySelector(".pause");
+      const reset = document.querySelector(".reset");
+      const clock = document.querySelector(".clock");
+      const timeTable = document.querySelector(".timeTable");
+
+      function stopwatch() {
+        //calculate the time elapsed based on the seconds count;
+        let hours = Math.floor(secondsCount/3600);
+        let minutes = Math.floor((secondsCount/60)%60);
+        let seconds = Math.floor(secondsCount%60);
+        //add zeros to the hours/minutes/seconds if they are less than ten
+        let displayHours = (hours < 10) ? "0" + hours: hours;
+        let displayMinutes = (minutes < 10) ? "0" + minutes: minutes;
+        let displaySeconds = (seconds < 10) ? "0" + seconds: seconds;
+        //display the time elapsed
+        clock.textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`
+        //add one to the seconds count
+        secondsCount++;
+      }
+      //when the Start time is clicked
+      start.addEventListener("click", function() {
+        //start the stop watch
+        stopWatch = setInterval(stopwatch, 1000);
+        //disable the start button and activate the others;
+        start.disabled = true;
+        pause.disabled = false;
+        reset.disabled = false;
+        start.textContent= "Resume";
+      });
+      //when the pause button is clicked, pause the stopwatch
+      pause.addEventListener("click", function() {
+        clearInterval(stopWatch);
+        start.disabled = false;
+        pause.disabled = true;
+      });
+      //when the reset button is clicked
+      reset.addEventListener("click", function() {
+        //insert the new row at the top of the table but after the label
+        let newRow = document.createElement("tr");
+        timeTable.insertBefore(newRow, timeTable.firstChild.nextSibling.nextSibling);
+        //add the new date and time elapsed to the table
+        let newDate = document.createElement("th");
+        newDate.textContent = new Date().toLocaleString();
+        newRow.insertBefore(newDate, newRow.firstChild)
+        let newRecord = document.createElement("th");
+        newRecord.textContent = document.querySelector(".clock").textContent;
+        newRow.appendChild(newRecord);
+        //stop the stopwatch from running and reset the seconds count and buttons
+        clearInterval(stopWatch);
+        secondsCount = 0;
+        reset.disabled = true;
+        pause.disabled = true;
+        start.disabled = false;
+        document.querySelector(".clock").textContent = "00:00:00"
+
+        //add the date and time elapsed to local storage
+        localStorage.setItem(storageKey, newDate.textContent);
+        storageKey++;
+        localStorage.setItem(storageKey, newRecord.textContent);
+        storageKey++;
+        start.textContent= "Start";
+      });
+    </script>
+  </body>
+</html>
