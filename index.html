@@ -36,6 +36,13 @@
         color: rgb(68, 68, 68);
         border: 2px solid rgb(41, 35, 39);
       }
+      .clearHistory {
+        position: relative;
+        left: -120%;
+        height: auto;
+        background-color: rgb(112, 0, 0);
+        border-color: red;
+      }
       table {
         
         color: #d1cfcc;
@@ -58,6 +65,7 @@
     <button class="start">Start</button>
     <button class="pause" disabled>Pause</button>
     <button class="reset" disabled>Reset</button>
+    <button class="clearHistory">Clear History</button>
     <table>
       <tbody class="timeTable">
         <tr>
@@ -105,6 +113,7 @@
       const start = document.querySelector(".start");
       const pause = document.querySelector(".pause");
       const reset = document.querySelector(".reset");
+      const clearHistory = document.querySelector(".clearHistory")
       const clock = document.querySelector(".clock");
       const timeTable = document.querySelector(".timeTable");
 
@@ -142,6 +151,7 @@
         reset.disabled = false;
         start.textContent= "Resume";
       });
+
       //when the pause button is clicked, pause the stopwatch
       pause.addEventListener("click", function() {
         pauseCount = new Date().getTime();
@@ -149,6 +159,7 @@
         start.disabled = false;
         pause.disabled = true;
       });
+
       //when the reset button is clicked
       reset.addEventListener("click", function() {
         //insert the new row at the top of the table but after the label
@@ -171,13 +182,19 @@
         pause.disabled = true;
         start.disabled = false;
         document.querySelector(".clock").textContent = "00:00:00"
-
         //add the date and time elapsed to local storage
         localStorage.setItem(storageKey, newDate.textContent);
         storageKey++;
         localStorage.setItem(storageKey, newRecord.textContent);
         storageKey++;
         start.textContent= "Start";
+      });
+      
+      clearHistory.addEventListener("click", function() {
+        if (window.confirm("Are you sure?\nYou are about to delete your whole history.")) {
+          localStorage.clear();
+          location.reload();
+        }
       });
     </script>
   </body>
