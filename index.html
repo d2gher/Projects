@@ -43,13 +43,13 @@
         border-collapse: collapse;
         display: block;
         position: relative;
-        left: -13%
+        left: -18%
         
       }
       th {
         border: 1px solid white;
         padding: .2em;
-        min-width: 10em;
+        min-width: 12em;
       }
     </style>
   </head>
@@ -100,7 +100,8 @@
       let stopWatch;
       let startTime = null;
       let pauseCount = 0;
-      let pauseTime = null;
+      let totalPause = 0;
+
       const start = document.querySelector(".start");
       const pause = document.querySelector(".pause");
       const reset = document.querySelector(".reset");
@@ -108,6 +109,10 @@
       const timeTable = document.querySelector(".timeTable");
 
       function stopwatch() {
+        //get the time at the moment the start button was pressed for the first time 
+        if (!startTime) { 
+          startTime = new Date().getTime();          
+        }
         //calculate the time elapsed based on the seconds count;
         let hours = Math.floor(secondsCount/3600);
         let minutes = Math.floor((secondsCount/60)%60);
@@ -118,13 +123,19 @@
         let displaySeconds = (seconds < 10) ? "0" + seconds: seconds;
         //display the time elapsed
         clock.textContent = `${displayHours}:${displayMinutes}:${displaySeconds}`
-        //add one to the seconds count
-        secondsCount++;
+        //get the elasped seconds from substracting the starting time and the pasused time if there is any
+        //from the current time, it's all in millseconds so we divide the result with 1000 to get the seconds 
+        secondsCount = Math.floor((new Date().getTime() - startTime - totalPause)/1000) 
       }
+
       //when the Start time is clicked
       start.addEventListener("click", function() {
+        //add that specific pasue to the the total pause time
+        if (pauseCount) {
+          totalPause += new Date().getTime() - pauseCount;
+        }
         //start the stop watch
-        stopWatch = setInterval(stopwatch, 1000);
+        stopWatch = setInterval(stopwatch, 100);
         //disable the start button and activate the others;
         start.disabled = true;
         pause.disabled = false;
@@ -133,6 +144,7 @@
       });
       //when the pause button is clicked, pause the stopwatch
       pause.addEventListener("click", function() {
+        pauseCount = new Date().getTime();
         clearInterval(stopWatch);
         start.disabled = false;
         pause.disabled = true;
@@ -151,6 +163,9 @@
         newRow.appendChild(newRecord);
         //stop the stopwatch from running and reset the seconds count and buttons
         clearInterval(stopWatch);
+        startTime = 0;
+        totalPause = 0;
+        pauseCount = 0;
         secondsCount = 0;
         reset.disabled = true;
         pause.disabled = true;
